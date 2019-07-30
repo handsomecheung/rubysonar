@@ -40,27 +40,23 @@ public class Unused {
                 continue;
             }
 
-            if (b.type instanceof ClassType || b.type instanceof ModuleType) {
+            if (!(b.type instanceof FunType)) {
+                continue;
+            }
+            FunType fun = (FunType) b.type;
+            if (fun.func.isLamba) {
                 continue;
             }
 
             String message = b.node.file + ": ";
-            if (b.type instanceof FunType) {
-                FunType fun = (FunType) b.type;
-                if (fun.func.isLamba) {
-                    continue;
-                }
-                if (fun.cls != null) {
-                    if (fun.isClassMethod) {
-                        message += "Unused Method: " + fun.cls.name + "::" + b.node.name;
-                    } else {
-                        message += "Unused Method: " + fun.cls.name + "#" + b.node.name;
-                    }
+            if (fun.cls != null) {
+                if (fun.isClassMethod) {
+                    message += "Unused Method: " + fun.cls.name + "::" + b.node.name;
                 } else {
-                    message += "Unused Method: " + b.node.name;
+                    message += "Unused Method: " + fun.cls.name + "#" + b.node.name;
                 }
             } else {
-                message += "Unused Variable: " + b.node.name;
+                message += "Unused Method: " + b.node.name;
             }
 
             Analyzer.self.putProblem(b.node, message);
