@@ -36,6 +36,7 @@ public class InstanceType extends Type {
 
     public InstanceType(@NotNull Type c, Name newName, Call call, List<Type> args) {
         this(c);
+
         if (newName != null && newName.id.equals("new")) {
             List<Binding> bs = table.lookupAttr(Constants.SELFNAME);
             if (newName != null) {

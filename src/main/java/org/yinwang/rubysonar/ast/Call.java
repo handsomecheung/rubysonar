@@ -89,7 +89,7 @@ public class Call extends Node {
             clsType = afun.target.transform(s);
 
             // Class.new
-            if (afun.attr.id.equals("new")) {
+            if (clsType instanceof ClassType && afun.attr.id.equals("new")) {
                 func = afun.target;
                 newName = afun.attr;
             } else if (afun.attr.id.equals("class")) {
