@@ -109,7 +109,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.yinwang.rubysonar.demos.Demo</mainClass>
+                                    <mainClass>org.yinwang.rubysonar.unused.Unused</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
