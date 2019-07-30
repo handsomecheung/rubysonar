@@ -3,6 +3,7 @@ package org.yinwang.rubysonar.ast;
 import org.jetbrains.annotations.NotNull;
 import org.yinwang.rubysonar.State;
 import org.yinwang.rubysonar.types.Type;
+import org.yinwang.rubysonar.types.FloatType;
 
 
 public class RbFloat extends Node {
@@ -20,7 +21,7 @@ public class RbFloat extends Node {
     @NotNull
     @Override
     public Type transform(State s) {
-        return Type.FLOAT;
+        return new FloatType(value);
     }
 
 
