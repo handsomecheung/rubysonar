@@ -254,6 +254,11 @@ public class Call extends Node {
                 pTypes, func.defaultTypes, hash, kw, star, block);
 
         Type toType = func.getMapping(fromType);
+
+        // cache not support multiple types in child classes
+        // disable cache temporarily
+        toType = null;
+
         if (toType == null || (call != null && (call instanceof Call) && ((Call) call).isSuperCall())) {
             if (func.isClassMethod) {
                 boolean wasStatic = Analyzer.self.staticContext;
