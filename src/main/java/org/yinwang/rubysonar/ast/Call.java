@@ -143,6 +143,13 @@ public class Call extends Node {
         Type star = starargs == null ? null : transformExpr(starargs, s);
         Type block = blockarg == null ? null : transformExpr(blockarg, s);
 
+        // assume all blocks will be called
+        if (blockarg instanceof Function) {
+                FunType funBlock = new FunType((Function) blockarg, s);
+            apply(funBlock, null, null, null, null, null, null);
+        }
+
+
         if (fun instanceof UnionType) {
             Set<Type> types = ((UnionType) fun).types;
             Type retType = Type.UNKNOWN;
