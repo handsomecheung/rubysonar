@@ -33,20 +33,23 @@ public class Demo {
     }
 
 
-    private void start(@NotNull String fileOrDir, Map<String, Object> options) throws Exception {
-        File f = new File(fileOrDir);
-        File rootDir = f.isFile() ? f.getParentFile() : f;
-        try {
-            rootPath = _.unifyPath(rootDir);
-        } catch (Exception e) {
-            _.die("File not found: " + f);
+    private void start(@NotNull List<String> fileOrDirs, Map<String, Object> options) throws Exception {
+        analyzer = new Analyzer(options);
+
+        for(String fileOrDir: fileOrDirs){
+            File f = new File(fileOrDir);
+            File rootDir = f.isFile() ? f.getParentFile() : f;
+            try {
+                rootPath = _.unifyPath(rootDir);
+            } catch (Exception e) {
+                _.die("File not found: " + f);
+            }
+
+            _.msg("Loading and analyzing files");
+            analyzer.analyze(f.getPath());
         }
 
-        analyzer = new Analyzer(options);
-        _.msg("Loading and analyzing files");
-        analyzer.analyze(f.getPath());
         analyzer.finish();
-
         generateHtml();
         analyzer.close();
     }
@@ -167,10 +170,12 @@ public class Demo {
     public static void main(@NotNull String[] args) throws Exception {
         Options options = new Options(args);
         List<String> argList = options.getArgs();
-        String fileOrDir = argList.get(0);
-        OUTPUT_DIR = new File(argList.get(1));
+        String out = argList.get(argList.size() - 1);
+        OUTPUT_DIR = new File(out);
+        argList.remove(out);
+        List<String> fileOrDirs = argList;
 
-        new Demo().start(fileOrDir, options.getOptionsMap());
+        new Demo().start(fileOrDirs, options.getOptionsMap());
         _.msg(_.getGCStats());
     }
 }
