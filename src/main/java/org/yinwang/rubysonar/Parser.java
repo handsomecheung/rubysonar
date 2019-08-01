@@ -416,12 +416,12 @@ public class Parser {
         }
 
         if (type.equals("cvar")) {
-            String id = "@@" + (String) map.get("id");
+            String id = Constants.CVAR_PREFIX + (String) map.get("id");
             return new Name(id, NameType.CLASS, file, start, end);
         }
 
         if (type.equals("ivar")) {
-            String id = "@" + (String) map.get("id");
+            String id = Constants.IVAR_PREFIX + (String) map.get("id");
             return new Name(id, NameType.INSTANCE, file, start, end);
         }
 

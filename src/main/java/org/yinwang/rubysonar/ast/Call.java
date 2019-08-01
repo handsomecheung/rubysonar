@@ -108,10 +108,22 @@ public class Call extends Node {
 
         Type fun = transformExpr(func, s);
 
-        // `self` refers to current class
         if (clsType != null && fun instanceof FunType) {
-            ((FunType) fun).env.update(
-                        Constants.SELFNAME, clsType.table.lookupAttr(Constants.SELFNAME));
+            FunType ffun = (FunType) fun;
+
+            // `self` refers to current class
+            ffun.env.update(Constants.SELFNAME,
+                            clsType.table.lookupAttr(Constants.SELFNAME));
+
+            // copy all instance variables
+            for (Map.Entry<String, List<Binding>> entry : clsType.table.getIVarsTable().entrySet()) {
+                ffun.env.update(entry.getKey(), entry.getValue());
+            }
+
+            // copy all class variables
+            for (Map.Entry<String, List<Binding>> entry : clsType.table.getCVarsTable().entrySet()) {
+                ffun.env.update(entry.getKey(), entry.getValue());
+            }
         }
 
         if (isSuperCall()) {
