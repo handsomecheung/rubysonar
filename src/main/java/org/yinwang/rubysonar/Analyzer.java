@@ -41,7 +41,7 @@ public class Analyzer {
 
     public List<String> path = new ArrayList<>();
     private Set<FunType> uncalled = new LinkedHashSet<>();
-    private Set<Object> callStack = new HashSet<>();
+    private Set<List<Object>> callStack = new HashSet<>();
     private Set<Object> importStack = new HashSet<>();
 
     private AstCache astCache;
@@ -176,18 +176,21 @@ public class Analyzer {
     }
 
 
-    public boolean inStack(Object f) {
-        return callStack.contains(f);
+    public boolean inStack(Object f, Object cls) {
+        List<Object> call = Arrays.asList(f, cls);
+        return callStack.contains(call);
     }
 
 
-    public void pushStack(Object f) {
-        callStack.add(f);
+    public void pushStack(Object f, Object cls) {
+        List<Object> call = Arrays.asList(f, cls);
+        callStack.add(call);
     }
 
 
-    public void popStack(Object f) {
-        callStack.remove(f);
+    public void popStack(Object f, Object cls) {
+        List<Object> call = Arrays.asList(f, cls);
+        callStack.remove(call);
     }
 
 
