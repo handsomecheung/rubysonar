@@ -218,14 +218,8 @@ public class Call extends Node {
         }
 
         Type callcls = null;
-        if (call != null) {
-            if (call instanceof Call) {
-                Call c = (Call) call;
-                if (c.func instanceof Attribute) {
-                    Attribute a = (Attribute) c.func;
-                    callcls = transformExpr(a.target, func.env);
-                }
-            }
+        if (call != null && func.cls != null) {
+            callcls = transformExpr(new Name(Constants.SELFNAME), func.env);
         }
 
         if (func.func == null) {
