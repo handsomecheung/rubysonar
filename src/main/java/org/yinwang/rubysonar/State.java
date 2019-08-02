@@ -451,6 +451,24 @@ public class State {
         }
         return ret;
     }
+    
+
+    @NotNull
+    private void convertSuperToParent() {
+        if (supers != null) {
+            parent = supers;
+            supers = null;
+            parent.convertSuperToParent();
+        }
+    }
+
+
+    @NotNull
+    public static State convertSuperToParent(State s) {
+        State c = s.copy();
+        c.convertSuperToParent();
+        return c;
+    }
 
 
     private boolean isCVar(@NotNull String key) {
