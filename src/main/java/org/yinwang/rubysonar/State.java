@@ -451,7 +451,7 @@ public class State {
         }
         return ret;
     }
-    
+
 
     @NotNull
     private void convertSuperToParent() {
@@ -468,44 +468,6 @@ public class State {
         State c = s.copy();
         c.convertSuperToParent();
         return c;
-    }
-
-
-    private boolean isCVar(@NotNull String key) {
-        return key.startsWith(Constants.CVAR_PREFIX);
-    }
-
-
-    private boolean isIVar(@NotNull String key) {
-        return !isCVar(key) && key.startsWith(Constants.IVAR_PREFIX);
-    }
-
-
-    @NotNull
-    public Map<String, List<Binding>> getIVarsTable() {
-        Map<String, List<Binding>> ret = new HashMap<>();
-
-        for (String key : table.keySet()) {
-            if (isIVar(key)) {
-                ret.put(key, table.get(key));
-            }
-        }
-
-        return ret;
-    }
-
-
-    @NotNull
-    public Map<String, List<Binding>> getCVarsTable() {
-        Map<String, List<Binding>> ret = new HashMap<>();
-
-        for (String key : table.keySet()) {
-            if (isCVar(key)) {
-                ret.put(key, table.get(key));
-            }
-        }
-
-        return ret;
     }
 
 
