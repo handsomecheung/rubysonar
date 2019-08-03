@@ -454,19 +454,18 @@ public class State {
 
 
     @NotNull
-    private void convertSuperToParent() {
+    private void copySuperToParent() {
         if (supers != null) {
             parent = supers;
-            supers = null;
-            parent.convertSuperToParent();
+            parent.copySuperToParent();
         }
     }
 
 
     @NotNull
-    public static State convertSuperToParent(State s) {
+    public static State copySuperToParent(State s) {
         State c = s.copy();
-        c.convertSuperToParent();
+        c.copySuperToParent();
         return c;
     }
 
