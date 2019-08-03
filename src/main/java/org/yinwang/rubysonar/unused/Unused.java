@@ -33,6 +33,10 @@ public class Unused {
             analyzer.analyze(f.getPath());
         }
 
+        for(String fileOrDir: fileOrDirs){
+            analyzer.analyze(new File(fileOrDir).getPath());
+        }
+
         _.msg("\nAnalysis Results:\n");
 
         for (Binding b : analyzer.allBindings) {

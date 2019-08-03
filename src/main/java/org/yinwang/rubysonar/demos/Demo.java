@@ -49,6 +49,10 @@ public class Demo {
             analyzer.analyze(f.getPath());
         }
 
+        for(String fileOrDir: fileOrDirs){
+            analyzer.analyze(new File(fileOrDir).getPath());
+        }
+
         analyzer.finish();
         generateHtml();
         analyzer.close();

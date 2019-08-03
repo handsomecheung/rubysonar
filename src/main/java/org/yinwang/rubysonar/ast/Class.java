@@ -53,6 +53,9 @@ public class Class extends Node {
     @NotNull
     @Override
     public Type transform(@NotNull State s) {
+        ClassType classType = new ClassType(name.id, s);
+
+        boolean reopen = false;
         if (locator != null) {
             Type reopened = transformExpr(locator, s);
             if (isStatic) {
@@ -64,9 +67,13 @@ public class Class extends Node {
                 }
                 return Type.CONT;
             }
+
+            if (reopened instanceof ClassType) {
+                classType = (ClassType) reopened;
+                reopen = true;
+            }
         }
 
-        ClassType classType = new ClassType(name.id, s);
         classType.table.setParent(s);
 
         if (base != null) {
@@ -78,10 +85,12 @@ public class Class extends Node {
             }
         }
 
-        // Bind ClassType to name here before resolving the body because the
-        // methods need this type as self.
-        Binder.bind(s, name, classType, Binding.Kind.CLASS);
-        classType.table.insert(Constants.SELFNAME, name, classType, Binding.Kind.SCOPE);
+        if (!reopen) {
+            // Bind ClassType to name here before resolving the body because the
+            // methods need this type as self.
+            Binder.bind(s, name, classType, Binding.Kind.CLASS);
+            classType.table.insert(Constants.SELFNAME, name, classType, Binding.Kind.SCOPE);
+        }
 
         if (body != null) {
             transformExpr(body, classType.table);

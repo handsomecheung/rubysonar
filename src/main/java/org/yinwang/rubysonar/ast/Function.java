@@ -77,6 +77,22 @@ public class Function extends Node {
         }
 
         FunType fun = new FunType(this, s);
+
+        boolean reopen = false;
+        List<Binding> ex;
+        if (locType instanceof ClassType || locType instanceof ModuleType || Analyzer.self.staticContext) {
+            ex = s.lookupLocalTagged(name.id, "class");
+        } else {
+            ex = s.lookupLocal(name.id);
+        }
+        if (ex != null) {
+            Type t = State.makeUnion(ex);
+            if (t instanceof FunType) {
+                fun = (FunType) t;
+                reopen = true;
+            }
+        }
+
         fun.table.setParent(s);
         fun.setDefaultTypes(resolveList(defaults, s));
 
@@ -89,13 +105,20 @@ public class Function extends Node {
 
         if (locType instanceof ClassType || locType instanceof ModuleType || Analyzer.self.staticContext) {
             fun.setClassMethod(true);
-            s.insertTagged(name.id, "class", name, fun, Binding.Kind.CLASS_METHOD);
+            if (!reopen) {
+                s.insertTagged(name.id, "class", name, fun, Binding.Kind.CLASS_METHOD);
+            }
             fun.table.setPath(s.extendPath(name.id, "."));
         } else {
-            s.insert(name.id, name, fun, Binding.Kind.METHOD);
+            if (!reopen) {
+                s.insert(name.id, name, fun, Binding.Kind.METHOD);
+            }
             fun.table.setPath(s.extendPath(name.id, "#"));
         }
-        Analyzer.self.addUncalled(fun);
+
+        if (!reopen) {
+            Analyzer.self.addUncalled(fun);
+        }
         return Type.CONT;
     }
 

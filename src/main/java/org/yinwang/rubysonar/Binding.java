@@ -130,7 +130,10 @@ public class Binding implements Comparable<Object> {
 
 
     public void addRef(Node ref) {
-        refs.add(ref);
+        // ref may be itself because source be analyzed multiple times
+        if (ref != node) {
+            refs.add(ref);
+        }
     }
 
 
