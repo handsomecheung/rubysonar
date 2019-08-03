@@ -1,18 +1,20 @@
 package org.yinwang.rubysonar.unused;
 
+
 import org.jetbrains.annotations.NotNull;
 import org.yinwang.rubysonar.Analyzer;
 import org.yinwang.rubysonar.Binding;
 import org.yinwang.rubysonar.Options;
 import org.yinwang.rubysonar._;
-import org.yinwang.rubysonar.ast.Attribute;
-import org.yinwang.rubysonar.types.ClassType;
 import org.yinwang.rubysonar.types.FunType;
-import org.yinwang.rubysonar.types.ModuleType;
 
 import java.io.File;
 import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class Unused {
@@ -39,6 +41,8 @@ public class Unused {
 
         _.msg("\nAnalysis Results:\n");
 
+        Set<String> resultKeys = new HashSet<>();
+        List<Result> results = new ArrayList<>();
         for (Binding b : analyzer.allBindings) {
             if (b.node.file == null || !b.refs.isEmpty()) {
                 continue;
@@ -52,21 +56,29 @@ public class Unused {
                 continue;
             }
 
-            String message = b.node.file + ": ";
+            String method;
             if (fun.cls != null) {
                 if (fun.isClassMethod) {
-                    message += "Unused Method: " + fun.cls.name + "::" + b.node.name;
+                    method = fun.cls.name + "::" + b.node.name;
                 } else {
-                    message += "Unused Method: " + fun.cls.name + "#" + b.node.name;
+                    method = fun.cls.name + "#" + b.node.name;
                 }
             } else {
-                message += "Unused Method: " + b.node.name;
+                method = b.node.name;
             }
-
-            Analyzer.self.putProblem(b.node, message);
-            _.msg(message);
+            Result result = new Result(b.node.file, b.node.start, method);
+            String resultKey = result.toString();
+            if (!resultKeys.contains(resultKey)) {
+                results.add(result);
+                resultKeys.add(resultKey);
+            }
+            Analyzer.self.putProblem(b.node, result.toString());
         }
 
+        Collections.sort(results);
+        for (Result result : results) {
+            _.msg(result.toString());
+        }
         _.msg("\nAnalysis Done");
 
         analyzer.close();
