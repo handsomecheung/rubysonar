@@ -59,6 +59,8 @@ public class Analyzer {
 
     public Map<String, Object> options;
 
+    private List<String> excludePaths = new ArrayList<>();
+
 
     public Analyzer() {
         this(null);
@@ -72,6 +74,11 @@ public class Analyzer {
         } else {
             this.options = new HashMap<>();
         }
+
+        if (options.get("exclude") != null) {
+            excludePaths = Arrays.asList(String.valueOf(options.get("exclude")).split(","));
+        }
+
         stats.putInt("startTime", System.currentTimeMillis());
         this.suffix = ".rb";
         addEnvPath();
@@ -288,6 +295,12 @@ public class Analyzer {
 
     @Nullable
     public Type loadFile(String path) {
+        for (String excludePath : excludePaths) {
+            if (path.contains(excludePath)) {
+                return null;
+            }
+        }
+
         path = _.unifyPath(path);
         File f = new File(path);
 
