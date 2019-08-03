@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yinwang.rubysonar.*;
 import org.yinwang.rubysonar.types.ClassType;
+import org.yinwang.rubysonar.types.ModuleType;
 import org.yinwang.rubysonar.types.Type;
+
+import java.util.List;
 
 
 public class Class extends Node {
@@ -53,11 +56,24 @@ public class Class extends Node {
     @NotNull
     @Override
     public Type transform(@NotNull State s) {
-        ClassType classType = new ClassType(name.id, s);
-
         boolean reopen = false;
-        if (locator != null) {
-            Type reopened = transformExpr(locator, s);
+        Type reopened;
+        State env;
+
+        if (locator instanceof Attribute) {
+            Attribute aloc = (Attribute) locator;
+            Type targetcls = lookupClassLocal(aloc.target, s);
+
+            if (!(targetcls instanceof ClassType || targetcls instanceof ModuleType)) {
+                Analyzer.self.putProblem(aloc.target, aloc.target + " is not Class or Module");
+                return Type.CONT;
+            }
+
+            env = targetcls.table;
+            reopened = lookupClassLocal(aloc.attr, env);
+        } else if (locator instanceof Name) {
+            env = s;
+            reopened = lookupClassLocal(locator, env);
             if (isStatic) {
                 if (body != null) {
                     boolean wasStatic = Analyzer.self.staticContext;
@@ -67,17 +83,36 @@ public class Class extends Node {
                 }
                 return Type.CONT;
             }
-
-            if (reopened instanceof ClassType) {
-                classType = (ClassType) reopened;
-                reopen = true;
-            }
+        } else {
+            Analyzer.self.putProblem(locator, locator + " is not Attribute or Name");
+            return Type.CONT;
         }
 
-        classType.table.setParent(s);
+        ClassType classType;
+        if (reopened instanceof ClassType) {
+            classType = (ClassType) reopened;
+            reopen = true;
+        } else {
+            classType = new ClassType(name.id, env);
+            classType.table.setParent(env);
+        }
 
         if (base != null) {
-            Type baseType = transformExpr(base, s);
+            Type baseType = null;
+            if (base instanceof Attribute) {
+                Attribute abase = (Attribute) base;
+                Type basetcls = lookupClassLocal(abase.target, s);
+                if (basetcls instanceof ClassType || basetcls instanceof ModuleType) {
+                    baseType = lookupClassLocal(abase.attr, basetcls.table);
+                } else {
+                    Analyzer.self.putProblem(abase.target, abase.target + " is not Class or Module");
+                }
+            } else if (base instanceof Name) {
+                baseType = lookupClassLocal(base, s);
+            } else {
+                Analyzer.self.putProblem(base, base + " is not Attribute or Name");
+            }
+
             if (baseType instanceof ClassType) {
                 classType.addSuper(baseType);
             } else {
@@ -88,13 +123,31 @@ public class Class extends Node {
         if (!reopen) {
             // Bind ClassType to name here before resolving the body because the
             // methods need this type as self.
-            Binder.bind(s, name, classType, Binding.Kind.CLASS);
+            Binder.bind(env, name, classType, Binding.Kind.CLASS);
             classType.table.insert(Constants.SELFNAME, name, classType, Binding.Kind.SCOPE);
         }
 
         if (body != null) {
             transformExpr(body, classType.table);
         }
+        return Type.CONT;
+    }
+
+
+    private Type lookupClassLocal(Node n, State s) {
+        if (n instanceof Name) {
+            Name name = (Name) n;
+            List<Binding> b = s.lookupLocal(name.id);
+            if (b != null) {
+                Analyzer.self.putRef(name, b);
+                Analyzer.self.resolved.add(name);
+                Analyzer.self.unresolved.remove(name);
+                return State.makeUnion(b);
+            }
+        } else {
+            Analyzer.self.putProblem(n, n + " should be a Name");
+        }
+
         return Type.CONT;
     }
 
