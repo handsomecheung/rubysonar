@@ -111,7 +111,7 @@ public class Call extends Node {
         if (fun instanceof FunType) {
             FunType ffun = (FunType) fun;
             if (clsType != null) {
-                ffun.env = State.convertSuperToParent(clsType.table);
+                ffun.env = State.copySuperToParent(clsType.table);
             } else if (ffun.cls != null) {
                 ffun.env = s;
             }
