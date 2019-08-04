@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.yinwang.rubysonar.*;
 import org.yinwang.rubysonar.types.ClassType;
+import org.yinwang.rubysonar.types.ModuleType;
 import org.yinwang.rubysonar.types.Type;
 
 
@@ -53,6 +54,17 @@ public class Class extends Node {
     @NotNull
     @Override
     public Type transform(@NotNull State s) {
+        if (locator instanceof Attribute) {
+            Attribute aloc = (Attribute) locator;
+            Type targetcls = transformExpr(aloc.target, s);
+            if (targetcls instanceof ClassType || targetcls instanceof ModuleType) {
+                Class cls = new Class(aloc.attr, base, body, docstring, isStatic, file, start, end);
+                return transformExpr(cls, targetcls.table);
+            } else {
+                Analyzer.self.putProblem(aloc.target, aloc.target + " is not a class or module");
+            }
+        }
+
         if (locator != null) {
             Type reopened = transformExpr(locator, s);
             if (isStatic) {
