@@ -70,10 +70,10 @@ public class Class extends Node {
             }
 
             env = targetcls.table;
-            reopened = lookupClassLocal(aloc.attr, env);
+            reopened = lookupClassLocalByName(aloc.attr, env);
         } else if (locator instanceof Name) {
             env = s;
-            reopened = lookupClassLocal(locator, env);
+            reopened = lookupClassLocalByName(locator, env);
             if (isStatic) {
                 if (body != null) {
                     boolean wasStatic = Analyzer.self.staticContext;
@@ -103,12 +103,12 @@ public class Class extends Node {
                 Attribute abase = (Attribute) base;
                 Type basetcls = lookupClassLocal(abase.target, s);
                 if (basetcls instanceof ClassType || basetcls instanceof ModuleType) {
-                    baseType = lookupClassLocal(abase.attr, basetcls.table);
+                    baseType = lookupClassLocalByName(abase.attr, basetcls.table);
                 } else {
                     Analyzer.self.putProblem(abase.target, abase.target + " is not Class or Module");
                 }
             } else if (base instanceof Name) {
-                baseType = lookupClassLocal(base, s);
+                baseType = lookupClassLocalByName(base, s);
             } else {
                 Analyzer.self.putProblem(base, base + " is not Attribute or Name");
             }
@@ -135,6 +135,24 @@ public class Class extends Node {
 
 
     private Type lookupClassLocal(Node n, State s) {
+        if (n instanceof Attribute) {
+            Attribute a = (Attribute) n;
+            Type targetcls = lookupClassLocal(a.target, s);
+            if (!(targetcls instanceof ClassType || targetcls instanceof ModuleType)) {
+                return Type.CONT;
+            } else {
+                return lookupClassLocalByName(a.attr, targetcls.table);
+            }
+        } else if (n instanceof Name) {
+            return lookupClassLocalByName(n, s);
+        } else {
+            Analyzer.self.putProblem(n, n + " should be a Name");
+            return Type.CONT;
+        }
+    }
+
+
+    private Type lookupClassLocalByName(Node n, State s) {
         if (n instanceof Name) {
             Name name = (Name) n;
             List<Binding> b = s.lookupLocal(name.id);
