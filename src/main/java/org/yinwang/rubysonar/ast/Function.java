@@ -3,6 +3,7 @@ package org.yinwang.rubysonar.ast;
 import org.jetbrains.annotations.NotNull;
 import org.yinwang.rubysonar.Analyzer;
 import org.yinwang.rubysonar.Binding;
+import org.yinwang.rubysonar.Binder;
 import org.yinwang.rubysonar.State;
 import org.yinwang.rubysonar._;
 import org.yinwang.rubysonar.types.ClassType;
@@ -96,7 +97,9 @@ public class Function extends Node {
         fun.table.setParent(s);
         fun.setDefaultTypes(resolveList(defaults, s));
 
-        if (!isLamba) {
+        if (isLamba) {
+            Binder.bind(fun.table, new Name("call"), fun, Binding.Kind.METHOD);
+        } else {
             Type outType = s.type;
             if (outType instanceof ClassType) {
                 fun.setCls((ClassType) outType);
@@ -105,12 +108,12 @@ public class Function extends Node {
 
         if (locType instanceof ClassType || locType instanceof ModuleType || Analyzer.self.staticContext) {
             fun.setClassMethod(true);
-            if (!reopen) {
+            if (!reopen && !isLamba) {
                 s.insertTagged(name.id, "class", name, fun, Binding.Kind.CLASS_METHOD);
             }
             fun.table.setPath(s.extendPath(name.id, "."));
         } else {
-            if (!reopen) {
+            if (!reopen && !isLamba) {
                 s.insert(name.id, name, fun, Binding.Kind.METHOD);
             }
             fun.table.setPath(s.extendPath(name.id, "#"));
@@ -119,7 +122,8 @@ public class Function extends Node {
         if (!reopen) {
             Analyzer.self.addUncalled(fun);
         }
-        return Type.CONT;
+
+        return fun;
     }
 
 
