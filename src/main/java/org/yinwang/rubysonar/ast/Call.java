@@ -112,9 +112,8 @@ public class Call extends Node {
             FunType ffun = (FunType) fun;
             if (clsType != null) {
                 ffun.env = State.copySuperToParent(clsType.table);
-                if (!ffun.isClassMethod) {
+                if (!ffun.isClassMethod && ffun.selfType != null) {
                     Binder.bind(ffun.env, new Name(Constants.SELFNAME), ffun.selfType, SCOPE);
-
                 }
             } else if (ffun.cls != null) {
                 ffun.env = s;
