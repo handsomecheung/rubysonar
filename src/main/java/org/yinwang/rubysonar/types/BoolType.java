@@ -1,54 +1,26 @@
 package org.yinwang.rubysonar.types;
 
 import org.yinwang.rubysonar.Analyzer;
-import org.yinwang.rubysonar.State;
+import org.yinwang.rubysonar.Supers;
 
 
 public class BoolType extends Type {
 
     public enum Value {
         True,
-        False,
-        Undecided
+        False
     }
 
-
     public Value value;
-    public State s1;
-    public State s2;
-
 
     public BoolType(Value value) {
         this.value = value;
+        if (value == BoolType.Value.True) {
+            setSuper(Supers.BOOL_TRUE);
+        } else if (value == BoolType.Value.False) {
+            setSuper(Supers.BOOL_FALSE);
+        }
     }
-
-
-    public BoolType(State s1, State s2) {
-        this.value = Value.Undecided;
-        this.s1 = s1;
-        this.s2 = s2;
-    }
-
-
-    public void setValue(Value value) {
-        this.value = value;
-    }
-
-
-    public void setS1(State s1) {
-        this.s1 = s1;
-    }
-
-
-    public void setS2(State s2) {
-        this.s2 = s2;
-    }
-
-
-    public BoolType swap() {
-        return new BoolType(s2, s1);
-    }
-
 
     @Override
     public boolean equals(Object other) {

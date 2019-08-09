@@ -39,12 +39,19 @@ public class Unused {
             analyzer.analyze(new File(fileOrDir).getPath());
         }
 
+        // assume all block and lambda be called
+        analyzer.applyUncalledLambda();
+
         _.msg("\nAnalysis Results:\n");
 
         Set<String> resultKeys = new HashSet<>();
         List<Result> results = new ArrayList<>();
         for (Binding b : analyzer.allBindings) {
             if (b.node.file == null || !b.refs.isEmpty()) {
+                continue;
+            }
+
+            if (b.node.file.equals(analyzer.builtinMethodPath)) {
                 continue;
             }
 

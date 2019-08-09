@@ -1,6 +1,7 @@
 package org.yinwang.rubysonar.types;
 
 import org.jetbrains.annotations.NotNull;
+import org.yinwang.rubysonar.Supers;
 
 
 public class SymbolType extends Type {
@@ -10,6 +11,7 @@ public class SymbolType extends Type {
 
     public SymbolType(@NotNull String name) {
         this.name = name;
+        setSuper(Supers.SYMBOL);
     }
 
 

@@ -12,6 +12,8 @@ import org.yinwang.rubysonar.types.ModuleType;
 import org.yinwang.rubysonar.types.Type;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
@@ -19,6 +21,7 @@ import java.util.*;
 public class Analyzer {
 
     public static String MODEL_LOCATION = "org/yinwang/rubysonar/models";
+    private static final String rubyBuiltinMethod = "org/yinwang/rubysonar/ruby/builtin_method.rb";
 
     // global static instance of the analyzer itself
     public static Analyzer self;
@@ -57,6 +60,8 @@ public class Analyzer {
 
     public boolean staticContext = false;
 
+    public String builtinMethodPath = null;
+
     public Map<String, Object> options;
 
     private List<String> excludePaths = new ArrayList<>();
@@ -78,6 +83,8 @@ public class Analyzer {
         if (options.get("exclude") != null) {
             excludePaths = Arrays.asList(String.valueOf(options.get("exclude")).split(","));
         }
+
+        builtinMethodPath = getPathRubyBuiltinMethod();
 
         stats.putInt("startTime", System.currentTimeMillis());
         this.suffix = ".rb";
@@ -112,12 +119,44 @@ public class Analyzer {
         addPath(dest);
     }
 
+    @Nullable
+    private String getPathRubyBuiltinMethod() {
+        String code;
+        String path = _.locateTmp("builtin_method.rb");
+
+        try {
+            InputStream s =
+                    Thread.currentThread()
+                            .getContextClassLoader()
+                            .getResourceAsStream(rubyBuiltinMethod);
+            code = _.readWholeStream(s);
+        } catch (Exception e) {
+            _.die("Failed to open resource file:" + rubyBuiltinMethod);
+            return null;
+        }
+
+        try {
+            FileWriter f = new FileWriter(path);
+            f.write(code);
+            f.close();
+        } catch (Exception e) {
+            _.die("Failed to write into: " + path);
+            return null;
+        }
+
+        return path;
+    }
 
     // main entry to the analyzer
     public void analyze(String path) {
         String upath = _.unifyPath(path);
         File f = new File(upath);
         projectDir = f.isDirectory() ? f.getPath() : f.getParent();
+
+        if (builtinMethodPath != null) {
+            loadFileRecursive(builtinMethodPath);
+        }
+
         loadFileRecursive(upath);
     }
 
@@ -485,6 +524,17 @@ public class Analyzer {
 
             for (FunType cl : uncalledDup) {
                 progress.tick();
+                Call.apply(cl, null, null, null, null, null, null);
+            }
+        }
+    }
+
+
+    public void applyUncalledLambda() {
+        List<FunType> uncalledDup = new ArrayList<>(uncalled);
+
+        for (FunType cl : uncalledDup) {
+            if (cl.func.isLamba) {
                 Call.apply(cl, null, null, null, null, null, null);
             }
         }

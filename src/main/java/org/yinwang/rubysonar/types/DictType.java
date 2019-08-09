@@ -1,6 +1,7 @@
 package org.yinwang.rubysonar.types;
 
 import org.jetbrains.annotations.NotNull;
+import org.yinwang.rubysonar.Supers;
 
 
 public class DictType extends Type {
@@ -12,6 +13,7 @@ public class DictType extends Type {
     public DictType(Type key0, Type val0) {
         keyType = key0;
         valueType = val0;
+        setSuper(Supers.HASH);
     }
 
 

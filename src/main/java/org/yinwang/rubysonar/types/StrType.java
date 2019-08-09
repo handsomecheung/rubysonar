@@ -1,7 +1,7 @@
 package org.yinwang.rubysonar.types;
 
-
 import org.yinwang.rubysonar.Analyzer;
+import org.yinwang.rubysonar.Supers;
 
 
 public class StrType extends Type {
@@ -11,6 +11,7 @@ public class StrType extends Type {
 
     public StrType(String value) {
         this.value = value;
+        setSuper(Supers.STRING);
     }
 
 

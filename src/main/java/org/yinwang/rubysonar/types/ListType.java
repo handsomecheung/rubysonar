@@ -1,6 +1,7 @@
 package org.yinwang.rubysonar.types;
 
 import org.jetbrains.annotations.NotNull;
+import org.yinwang.rubysonar.Supers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,7 @@ public class ListType extends Type {
 
     public ListType(Type elt0) {
         eltType = elt0;
+        setSuper(Supers.ARRAY);
     }
 
 

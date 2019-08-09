@@ -5,6 +5,7 @@ import org.yinwang.rubysonar.Analyzer;
 import org.yinwang.rubysonar.Binding;
 import org.yinwang.rubysonar.Constants;
 import org.yinwang.rubysonar.State;
+import org.yinwang.rubysonar.types.NilType;
 import org.yinwang.rubysonar.types.Type;
 
 import java.util.List;
@@ -76,8 +77,12 @@ public class Name extends Node {
             Analyzer.self.resolved.add(this);
             Analyzer.self.unresolved.remove(this);
             return State.makeUnion(b);
-        } else if (id.equals("true") || id.equals("false")) {
-            return Type.BOOL;
+        } else if (id.equals("true")) {
+            return Type.TRUE;
+        } else if (id.equals("false")) {
+            return Type.FALSE;
+        } else if (id.equals("nil")) {
+            return new NilType();
         } else {
             Analyzer.self.putProblem(this, "unbound variable " + id);
             Analyzer.self.unresolved.add(this);

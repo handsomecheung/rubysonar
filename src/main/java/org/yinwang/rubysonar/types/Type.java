@@ -4,11 +4,14 @@ import org.jetbrains.annotations.NotNull;
 import org.yinwang.rubysonar.Analyzer;
 import org.yinwang.rubysonar.State;
 import org.yinwang.rubysonar.TypeStack;
+import org.yinwang.rubysonar.Binding;
+import org.yinwang.rubysonar.ast.Name;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 
 public abstract class Type {
@@ -46,13 +49,6 @@ public abstract class Type {
         this.mutated = mutated;
     }
 
-
-    public boolean isUndecidedBool() {
-        return this instanceof BoolType && ((BoolType) this).value == BoolType.Value.Undecided &&
-                ((BoolType) this).s1 != null && ((BoolType) this).s2 != null;
-    }
-
-
     public boolean isNumType() {
         return this instanceof IntType || this instanceof FloatType;
     }
@@ -65,6 +61,27 @@ public abstract class Type {
 
     public boolean isUnknownType() {
         return this == Type.UNKNOWN;
+    }
+
+    public void setSuper(String clsname) {
+        ClassType supercls = null;
+        Name name = new Name(clsname);
+        List<Binding> b = Analyzer.self.globaltable.lookupLocal(name.id);
+        if (b != null) {
+            Analyzer.self.putRef(name, b);
+            Analyzer.self.resolved.add(name);
+            Analyzer.self.unresolved.remove(name);
+            Type t = State.makeUnion(b);
+            if (t instanceof ClassType) {
+                supercls = (ClassType) t;
+            }
+        }
+
+        if (!(supercls instanceof ClassType)) {
+            supercls  = new ClassType(clsname, Analyzer.self.globaltable);
+        }
+
+        setTable(supercls.table);
     }
 
 
@@ -123,7 +140,6 @@ public abstract class Type {
     public static StrType STR = new StrType(null);
     public static IntType INT = new IntType();
     public static FloatType FLOAT = new FloatType();
-    public static BoolType BOOL = new BoolType(BoolType.Value.Undecided);
     public static BoolType TRUE = new BoolType(BoolType.Value.True);
     public static BoolType FALSE = new BoolType(BoolType.Value.False);
 }

@@ -109,8 +109,7 @@ public class Attribute extends Node {
         } else {
             for (Binding b : bs) {
                 Analyzer.self.putRef(attr, b);
-                if (parent != null && (parent instanceof Call) &&
-                        b.type instanceof FunType && targetType instanceof InstanceType)
+                if (parent != null && (parent instanceof Call) && b.type instanceof FunType)
                 {  // method call
                     ((FunType) b.type).setSelfType(targetType);
                 }
