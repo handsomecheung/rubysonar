@@ -44,7 +44,16 @@ public class InstanceType extends Type {
             }
         }
 
-        Type initFunc = table.lookupAttrType("initialize");
+        Type initFunc = null;       
+        Name initName = new Name("initialize");   
+        List<Binding> b = table.lookupAttr(initName.id);
+        if (b != null) {
+            Analyzer.self.putRef(initName, b);
+            Analyzer.self.resolved.add(initName);
+            Analyzer.self.unresolved.remove(initName);
+            initFunc = State.makeUnion(b);
+        }
+        
         if (initFunc != null && initFunc instanceof FunType && ((FunType) initFunc).func != null) {
             ((FunType) initFunc).setSelfType(this);
             Call.apply((FunType) initFunc, args, null, null, null, null, call);

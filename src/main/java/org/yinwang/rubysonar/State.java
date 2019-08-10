@@ -375,13 +375,7 @@ public class State {
             return makeUnion(bs);
         }
     }
-
-
-    @Nullable
-    public Type lookupAttrTypeTagged(String attr, String tag) {
-        return lookupAttrType(makeTagId(attr, tag));
-    }
-
+    
 
     public static Type makeUnion(List<Binding> bs) {
         Type t = Type.UNKNOWN;
