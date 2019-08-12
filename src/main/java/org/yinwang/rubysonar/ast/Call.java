@@ -213,21 +213,16 @@ public class Call extends Node {
             func.func.called = true;
         }
 
-        Type callcls = null;
-        if (call != null && func.cls != null) {
-            callcls = transformExpr(new Name(Constants.SELFNAME), func.env);
-        }
-
         if (func.func == null) {
             // func without definition (possibly builtins)
             return func.getReturnType();
-        } else if (call != null && Analyzer.self.inStack(call, callcls)) {
+        } else if (call != null && Analyzer.self.inStack(call, func.func)) {
             func.setSelfType(null);
             return Type.UNKNOWN;
         }
 
         if (call != null) {
-            Analyzer.self.pushStack(call, callcls);
+            Analyzer.self.pushStack(call, func.func);
         }
 
         List<Type> pTypes = new ArrayList<>();
@@ -285,7 +280,7 @@ public class Call extends Node {
         }
 
         if (call != null) {
-            Analyzer.self.popStack(call, callcls);
+            Analyzer.self.popStack(call, func.func);
         }
 
         func.setSelfType(null);
