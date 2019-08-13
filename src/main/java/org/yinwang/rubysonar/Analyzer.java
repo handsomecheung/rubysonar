@@ -531,12 +531,17 @@ public class Analyzer {
 
 
     public void applyUncalledLambda() {
+        boolean retry = false;
         List<FunType> uncalledDup = new ArrayList<>(uncalled);
-
         for (FunType cl : uncalledDup) {
             if (cl.func.isLamba) {
                 Call.apply(cl, null, null, null, null, null, null);
+                retry = true;
             }
+        }
+
+        if (retry) {
+            applyUncalledLambda();
         }
     }
 
