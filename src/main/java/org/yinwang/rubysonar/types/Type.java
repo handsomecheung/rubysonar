@@ -2,9 +2,11 @@ package org.yinwang.rubysonar.types;
 
 import org.jetbrains.annotations.NotNull;
 import org.yinwang.rubysonar.Analyzer;
+import org.yinwang.rubysonar.Binder;
 import org.yinwang.rubysonar.State;
 import org.yinwang.rubysonar.TypeStack;
 import org.yinwang.rubysonar.Binding;
+import org.yinwang.rubysonar.Supers;
 import org.yinwang.rubysonar.ast.Name;
 
 import java.util.HashMap;
@@ -63,7 +65,7 @@ public abstract class Type {
         return this == Type.UNKNOWN;
     }
 
-    public void setSuper(String clsname) {
+    private static ClassType getSuper(String clsname) {
         ClassType supercls = null;
         Name name = new Name(clsname);
         List<Binding> b = Analyzer.self.globaltable.lookupLocal(name.id);
@@ -79,8 +81,15 @@ public abstract class Type {
 
         if (!(supercls instanceof ClassType)) {
             supercls  = new ClassType(clsname, Analyzer.self.globaltable);
+            Binder.bind(Analyzer.self.globaltable, new Name(clsname), supercls, Binding.Kind.CLASS);
         }
 
+        return supercls;
+    }
+
+
+    public void setSuper(String clsname) {
+        ClassType supercls = getSuper(clsname);
         setTable(supercls.table);
     }
 
@@ -134,9 +143,9 @@ public abstract class Type {
     }
 
 
-    public static InstanceType UNKNOWN = new InstanceType(new ClassType("?", null, null));
-    public static InstanceType CONT = new InstanceType(new ClassType("nil", null, null));
-    public static InstanceType NIL = new InstanceType(new ClassType("nil", null, null));
+    public static InstanceType UNKNOWN = new InstanceType(new ClassType("?", null, getSuper(Supers.OBJECT)));
+    public static InstanceType CONT = new InstanceType(new ClassType("nil", null, getSuper(Supers.OBJECT)));
+    public static InstanceType NIL = new InstanceType(new ClassType("nil", null, getSuper(Supers.OBJECT)));
     public static StrType STR = new StrType(null);
     public static IntType INT = new IntType();
     public static FloatType FLOAT = new FloatType();
