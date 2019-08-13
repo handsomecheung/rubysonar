@@ -101,7 +101,7 @@ public class Class extends Node {
             Type baseType = null;
             if (base instanceof Attribute) {
                 Attribute abase = (Attribute) base;
-                Type basetcls = lookupClassLocal(abase.target, s);
+                Type basetcls = transformExpr(abase.target, s);
                 if (basetcls instanceof ClassType || basetcls instanceof ModuleType) {
                     baseType = lookupClassLocalByName(abase.attr, basetcls.table);
                 } else {
