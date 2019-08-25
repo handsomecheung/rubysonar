@@ -81,7 +81,9 @@ public class Analyzer {
         }
 
         if (options.get("exclude") != null) {
-            excludePaths = Arrays.asList(String.valueOf(options.get("exclude")).split(","));
+            for (String path : String.valueOf(options.get("exclude")).split(",")) {
+                excludePaths.add(_.unifyPath(path));
+            }
         }
 
         builtinMethodPath = getPathRubyBuiltinMethod();
